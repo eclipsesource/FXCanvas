@@ -26,6 +26,7 @@
 package javafx.embed.swt;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -560,6 +561,13 @@ public class FXCanvas extends Canvas {
             resizePixelBuffer(scaleFactor);
             lastScaleFactor = scaleFactor;
             scenePeer.setPixelScaleFactor((float)scaleFactor);
+            try {
+        			Method method = scenePeer.getClass().getSuperclass().getDeclaredMethod("updateSceneState");
+        			method.setAccessible(true);
+        			method.invoke(scenePeer);
+            } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            		// Fail silently
+            }
         }
 
         // if we can't get the pixels, draw the bits that were there before
