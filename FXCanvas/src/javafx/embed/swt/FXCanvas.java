@@ -282,6 +282,19 @@ public class FXCanvas extends Canvas {
         display.addFilter(SWT.Move, moveFilter);
     }
 
+    /**
+     * @inheritDoc
+     */
+    public FXCanvas(@NamedArg("parent") Composite parent, @NamedArg("style") int style, boolean bufferOnly, boolean noBackground) {
+        super(parent, noBackground ? style | SWT.NO_BACKGROUND : style );
+        setBufferOnly(bufferOnly);
+        initFx();
+        hostContainer = new HostContainer();
+        registerEventListeners();
+        Display display = parent.getDisplay();
+        display.addFilter(SWT.Move, moveFilter);
+    }
+    
     public void setBufferOnly(boolean bufferOnly) {
 		this.bufferOnly = bufferOnly;
 	}
