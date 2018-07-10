@@ -755,6 +755,13 @@ public class FXCanvas extends Canvas {
         redraw();
         update();
 
+        // For some reason, on Linux/GTK2, we get a Paint event before the size is 
+        // set to non-0 when activating a Part in a PartStack (Tab Folder). We need
+        // to force a refresh to make sure we paint the new non-null area.
+        // This is a workaround, so only do that if the size is initially 0, to avoid
+        // redrawing too often.
+        boolean forceRedraw = pWidth == 0 || pHeight == 0;
+        
         pWidth = getClientArea().width;
         pHeight = getClientArea().height;
 
@@ -766,6 +773,11 @@ public class FXCanvas extends Canvas {
 
         stagePeer.setSize(pWidth, pHeight);
         scenePeer.setSize(pWidth, pHeight);
+        
+        if (forceRedraw) {
+	        redraw();
+	        update();
+        }
     }
 
     private void resizePixelBuffer(double newScaleFactor) {
