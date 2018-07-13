@@ -155,6 +155,10 @@ public class FXCanvas extends Canvas {
     
     private boolean bufferOnly;
     private AtomicLong frameNumber = new AtomicLong();
+    
+    // Workaround for Linux/GTK2, where we sometimes need to force
+    // the refresh of the firstFrame in order to avoid an empty canvas
+    private boolean firstFrame = true;
 
     // This filter runs when any widget is moved
     Listener moveFilter = event -> {
@@ -635,6 +639,9 @@ public class FXCanvas extends Canvas {
             imageData.setPixels(0, 0,width * height, buffer.array(), 0);
         }
         
+        // We finally got a valid image to paint :)
+        firstFrame = false;
+        
         Image image = new Image(Display.getDefault(), imageData);
         pe.gc.drawImage(image, 0, 0, width, height, 0, 0, pWidth, pHeight);
         image.dispose();
@@ -801,6 +808,15 @@ public class FXCanvas extends Canvas {
                           AbstractEvents.FOCUSEVENT_ACTIVATED :
                           AbstractEvents.FOCUSEVENT_DEACTIVATED);
         stagePeer.setFocused(focused, focusCause);
+    }
+    
+    private void repaint() {
+    	this.redraw();
+    	if (firstFrame) {
+    		// On Linux/GTK2, the first frame is not necessarily painted,
+    		// unless we force an update.
+    		this.update();
+    	}
     }
 
     private class HostContainer implements HostInterface {
@@ -1160,7 +1176,7 @@ public class FXCanvas extends Canvas {
                         if( bufferOnly ) {
                         		paintControl(null);
                         } else {
-                        		FXCanvas.this.redraw();	
+                        		FXCanvas.this.repaint();	
                         }
                     } finally {
                         synchronized (lock) {
