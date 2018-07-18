@@ -397,6 +397,15 @@ public class FXCanvas extends Canvas {
         }
         return super.computeSize(wHint, hHint, changed);
     }
+    
+ // Hack to get notified when we are reparented
+    @Override
+    public void reskin(int flags) {
+    		super.reskin(flags);
+    		if( flags == SWT.ALL ) {
+    			sendMoveEventToFX();
+    		}
+    }
 
     /**
      * Returns the JavaFX scene attached to this {@code FXCanvas}.
