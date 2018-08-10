@@ -25,8 +25,8 @@ public class OSXReparentSupport extends ReparentSupport {
 		Field_Shell_window.setAccessible(true);
 		Class<?> cl_id = Class.forName("org.eclipse.swt.internal.cocoa.id");
 		Field_id_field_id = cl_id.getDeclaredField("id");
-		Selector_sel_addChildWindow_ordered_ = ((Number) Class_OS.getField("sel_addChildWindow_ordered_").get(null)).longValue();
-		Selector_sel_removeChildWindow_ = ((Number) Class_OS.getField("sel_removeChildWindow_").get(null)).longValue();
+		Selector_sel_addChildWindow_ordered_ = Class_OS.getField("sel_addChildWindow_ordered_").getLong(null);
+		Selector_sel_removeChildWindow_ = Class_OS.getField("sel_removeChildWindow_").getLong(null);
 	}
 
 	private long nsWindowPointer(Shell shell) throws Throwable {
