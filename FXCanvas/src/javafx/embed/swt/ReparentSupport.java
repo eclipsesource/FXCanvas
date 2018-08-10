@@ -91,6 +91,8 @@ public abstract class ReparentSupport {
 	public static void init() throws Throwable {
 		if ("cocoa".equals(SWT.getPlatform())) {
 			new OSXReparentSupport();
+		} else if( "win32".equals(SWT.getPlatform()) ) {
+			new Win32ReparentSupport();
 		}
 	}
 }
