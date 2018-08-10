@@ -1,5 +1,6 @@
 package javafx.embed.swt;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import org.eclipse.swt.widgets.Shell;
@@ -11,16 +12,20 @@ public class Win32ReparentSupport extends ReparentSupport {
 	private final Class<?> Class_OS;
 	private final Method Method_SetWindowLongPtr;
 	private final int GWL_HWNDPARENT;
+	
+	private final Field Field_Shell_handle;
 
 	public Win32ReparentSupport() throws Throwable {
 		super();
 		Class_OS = Class.forName("org.eclipse.swt.internal.win32.OS");
 		Method_SetWindowLongPtr = Class_OS.getDeclaredMethod("SetWindowLongPtr", long.class, int.class, long.class);
 		GWL_HWNDPARENT = Class_OS.getDeclaredField("GWL_HWNDPARENT").getInt(null);
+		
+		Field_Shell_handle = Shell.class.getDeclaredField("handle");
 	}
 
-	private long getWindowPointer(Shell shell) {
-		return shell.handle;
+	private long getWindowPointer(Shell shell) throws Throwable {
+		return Field_Shell_handle.getLong(shell);
 	}
 
 	@Override
