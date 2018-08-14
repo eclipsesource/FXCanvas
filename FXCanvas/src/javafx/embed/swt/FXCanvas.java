@@ -238,6 +238,11 @@ public class FXCanvas extends Canvas {
     private static Method swtDPIUtilMethod;
 
     static {
+    		try {
+    			ReparentSupport.init();
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
         if (SWT.getPlatform().equals("cocoa")) {
             try {
                 windowField = Shell.class.getDeclaredField("window");
@@ -812,8 +817,10 @@ public class FXCanvas extends Canvas {
         stagePeer.setFocused(focused, focusCause);
     }
 
-    private class HostContainer implements HostInterface {
+    public class HostContainer implements HostInterface {
 
+    		public FXCanvas fxCanvas = FXCanvas.this;
+    	
         @Override
         public void setEmbeddedStage(EmbeddedStageInterface embeddedStage) {
             stagePeer = embeddedStage;
