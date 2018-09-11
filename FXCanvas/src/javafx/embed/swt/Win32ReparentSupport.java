@@ -21,7 +21,7 @@ public class Win32ReparentSupport extends ReparentSupport {
 		Method_SetWindowLongPtr = Class_OS.getDeclaredMethod("SetWindowLongPtr", long.class, int.class, long.class);
 		GWL_HWNDPARENT = Class_OS.getDeclaredField("GWL_HWNDPARENT").getInt(null);
 		
-		Field_Shell_handle = Shell.class.getDeclaredField("handle");
+		Field_Shell_handle = Shell.class.getField("handle");
 	}
 
 	private long getWindowPointer(Shell shell) throws Throwable {
