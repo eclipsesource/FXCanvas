@@ -25,6 +25,9 @@ public class Win32ReparentSupport extends ReparentSupport {
 	}
 
 	private long getWindowPointer(Shell shell) throws Throwable {
+		if( Field_Shell_handle == null ) {
+			return 0;
+		}
 		return Field_Shell_handle.getLong(shell);
 	}
 
