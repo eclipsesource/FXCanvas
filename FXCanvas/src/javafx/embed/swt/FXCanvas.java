@@ -1144,9 +1144,12 @@ public class FXCanvas extends Canvas {
                     }
                 });
             });
-            //Force the old drop target to be disposed before creating a new one
-            setDropTarget(null);
-            setDropTarget(createDropTarget(embeddedScene));
+            
+            if( ! System.getProperty("javafx.version","").startsWith("8") ) {
+                //Force the old drop target to be disposed before creating a new one
+                setDropTarget(null);
+                setDropTarget(createDropTarget(embeddedScene));            	
+            }
         }
 
         @Override
