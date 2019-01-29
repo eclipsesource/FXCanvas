@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -155,6 +156,7 @@ public class FXCanvas extends Canvas {
     
     private boolean bufferOnly;
     private AtomicLong frameNumber = new AtomicLong();
+    public BiConsumer<Integer, String> debugConsumer = (v,t) -> {};
 
     // This filter runs when any widget is moved
     Listener moveFilter = event -> {
@@ -285,6 +287,7 @@ public class FXCanvas extends Canvas {
         registerEventListeners();
         Display display = parent.getDisplay();
         display.addFilter(SWT.Move, moveFilter);
+        debugConsumer.accept(10, "<initializer>: FXCanvas created");
     }
 
     /**
@@ -298,17 +301,21 @@ public class FXCanvas extends Canvas {
         registerEventListeners();
         Display display = parent.getDisplay();
         display.addFilter(SWT.Move, moveFilter);
+        debugConsumer.accept(10, "<initializer>: Buffer only FXCanvas created");
     }
     
     public void setBufferOnly(boolean bufferOnly) {
 		this.bufferOnly = bufferOnly;
+		debugConsumer.accept(10, "setBufferOnly: Set buffer only: " + bufferOnly);
 	}
     
     public long getFrameNumber() {
+    		debugConsumer.accept(10, "getFrameNumber: Current frame: " + frameNumber.get() );
 		return frameNumber.get();
 	}
     
     public IntBuffer getPixelData() {
+    		debugConsumer.accept(10, "getPixelData: Fetched Pixeldata");
     		return pixelsBuf;
     }
     
@@ -433,6 +440,7 @@ public class FXCanvas extends Canvas {
      * @see javafx.application.Platform#isFxApplicationThread()
      */
     public void setScene(final Scene newScene) {
+    		debugConsumer.accept(10, "setScene: New scene " + newScene );
         checkWidget();
 
         if ((stage == null) && (newScene != null)) {
@@ -579,12 +587,15 @@ public class FXCanvas extends Canvas {
     IntBuffer lastPixelsBuf =  null;
     
     private void paintControl(PaintEvent pe) {
+    		debugConsumer.accept(10, "paintControl: start repainting content");
         if ((scenePeer == null) || (pixelsBuf == null)) {
+        		debugConsumer.accept(10, "paintControl: no buffer available. Draw nothing.");
             return;
         }
 
         double scaleFactor = getScaleFactor();
         if (lastScaleFactor != scaleFactor) {
+        		debugConsumer.accept(10, "paintControl: updated pixel scaling");
             resizePixelBuffer(scaleFactor);
             lastScaleFactor = scaleFactor;
             scenePeer.setPixelScaleFactor((float)scaleFactor);
@@ -652,6 +663,7 @@ public class FXCanvas extends Canvas {
         Image image = new Image(Display.getDefault(), imageData);
         pe.gc.drawImage(image, 0, 0, width, height, 0, 0, pWidth, pHeight);
         image.dispose();
+        debugConsumer.accept(10, "paintControl: ended repainting content");
     }
 
     private void sendMoveEventToFX() {
@@ -667,6 +679,8 @@ public class FXCanvas extends Canvas {
         if (scenePeer == null) {
             return;
         }
+        
+        debugConsumer.accept(10, "sendMouseEventToFX: Sending event " + me);
 
         Point los = toDisplay(me.x, me.y);
         boolean primaryBtnDown = (me.stateMask & SWT.BUTTON1) != 0;
@@ -1170,15 +1184,23 @@ public class FXCanvas extends Canvas {
         Object lock = new Object();
         boolean queued = false;
         public void repaint() {
+        		debugConsumer.accept(10, "Issue a redraw");
             synchronized (lock) {
-                if (queued) return;
-                queued = true;
+            		debugConsumer.accept(10, "Entering the lock");
+	            	if (queued) {
+	            		debugConsumer.accept(10, "Already queued");
+	            		return;
+	            	}
+            	    queued = true;
+                
+            	    debugConsumer.accept(10, "Queing redraw");
                 Display.getDefault().asyncExec(() -> {
                     try {
                         if (isDisposed()) return;
                         if( bufferOnly ) {
                         		paintControl(null);
                         } else {
+                        		debugConsumer.accept(10, "Sending a redraw");
                         		FXCanvas.this.redraw();	
                         }
                     } finally {
@@ -1187,6 +1209,7 @@ public class FXCanvas extends Canvas {
                         }
                     }
                 });
+                debugConsumer.accept(10, "Leaving the lock");
             }
         }
 
