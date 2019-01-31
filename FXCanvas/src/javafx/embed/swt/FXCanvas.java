@@ -582,6 +582,23 @@ public class FXCanvas extends Canvas {
         if ((scenePeer == null) || (pixelsBuf == null)) {
             return;
         }
+        
+        // Ensure the EmbeddedWindow knows its correct location
+ 		// It's unclear when it becomes inconsistent, but is typically
+ 		// required when opening FX Popups in an SWT Dialog (The EmbeddedWindow
+ 		// doesn't know its correct location, unless the SWT Dialog was moved)
+ 		// It may also be required in some cases, after the SWT Window was resized
+ 		Point displayLocation = toDisplay(0, 0);
+ 		if (stage != null) {
+ 			// setX/setY are not no-ops, even when the value is unchanged, so let's make
+ 			// sure we only do it when necessary
+ 			if (Math.abs(stage.getX() - displayLocation.x) > 0.1) {
+ 				stage.setX(displayLocation.x);
+ 			}
+ 			if (Math.abs(stage.getY() - displayLocation.y) > 0.1) {
+ 				stage.setY(displayLocation.y);
+ 			}
+ 		}
 
         double scaleFactor = getScaleFactor();
         if (lastScaleFactor != scaleFactor) {
